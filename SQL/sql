@@ -1,0 +1,14 @@
+1.
+select route_id,name,sum(distance) as total_distance
+from routes 
+join route_points
+on
+route_points.route_id = routes.id 
+group by route_id,name
+
+2.
+
+3.select station_id,name as station_name,slot,time
+from station join times 
+on times.station_id=station.id
+where station_id=1 and slot=1;
