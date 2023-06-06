@@ -35,106 +35,156 @@ async def helloWorld():
 # create teachers
 @app.post('/create_teacher/')
 async def create_teacher(teacher: Teacher, db: Session = Depends(get_db)):
-    data = models.TeachersModel(email=teacher.email, name=teacher.name, age=teacher.age, subject=teacher.subject)
-    db.add(data)
-    db.commit()
-    db.refresh(data)
-    return data
-
+    try:
+        data = models.TeachersModel(email=teacher.email, name=teacher.name, age=teacher.age, subject=teacher.subject)
+        db.add(data)
+        db.commit()
+        db.refresh(data)
+        return data
+    except Exception as e:
+        db.rollback()
+        raise HTTPException(
+            status_code=500,
+            detail='Internal server error'
+        )
 # get teachers
 @app.get('/teachers/')
 async def teachers(db: Session = Depends(get_db)):
-    return db.query(models.TeachersModel).all()
+    try:
+        return db.query(models.TeachersModel).all()
+    except:
+        raise HTTPException(
+            status_code=500,
+            detail='Internal server error'
+        )
 
 # get a teacher
 @app.get('/teacher/{teacherId}')
 async def teacher(teacherId: int, db: Session = Depends(get_db)):
-    
-    user_data = db.query(models.TeachersModel).filter(models.TeachersModel.id == teacherId).first()
-    if not user_data:
-        raise HTTPException(status_code=404, detail='User not found')
-    return user_data
+    try:
+        user_data = db.query(models.TeachersModel).filter(models.TeachersModel.id == teacherId).first()
+        if not user_data:
+            raise HTTPException(status_code=404, detail='User not found')
+        return user_data
+    except:
+        raise HTTPException(
+            status_code=500,
+            detail='Internal server error'
+        )
 
 
 # update teacher details
 @app.put('/teacher/{teacherId}/')
 async def update_teacher(teacherId: int, updated_teacher: Teacher, db: Session = Depends(get_db)):
-    user_data = db.query(models.TeachersModel).filter(models.TeachersModel.id == teacherId).first()
-    if not user_data:
-        raise HTTPException(status_code=404, detail='User not found')
-    user_data.name = updated_teacher.name
-    user_data.age = updated_teacher.age
-    user_data.subject = updated_teacher.subject
-    db.commit()
+    try:
+        user_data = db.query(models.TeachersModel).filter(models.TeachersModel.id == teacherId).first()
+        if not user_data:
+            raise HTTPException(status_code=404, detail='User not found')
+        user_data.name = updated_teacher.name
+        user_data.age = updated_teacher.age
+        user_data.subject = updated_teacher.subject
+        db.commit()
 
-    return {'message':'User updated successfully'}
+        return {'message':'User updated successfully'}
+    except:
+        db.rollback()
+        raise HTTPException(
+            status_code=500,
+            detail='Internal server error'
+        )
     
 # delete teacher
 @app.delete('/delete_teacher/{teacherId}/')
 async def deleter_teacher(teacherId: int, db: Session = Depends(get_db)):
-    user_data = db.query(models.TeachersModel).filter(models.TeachersModel.id == teacherId).first()
-    if not user_data:
-        raise HTTPException(status_code=404, detail='User not found')
+    try:
+        user_data = db.query(models.TeachersModel).filter(models.TeachersModel.id == teacherId).first()
+        if not user_data:
+            raise HTTPException(status_code=404, detail='User not found')
 
-    db.delete(user_data)
-    db.commit()
-    return {'message':'User deleted successfully'}
-
+        db.delete(user_data)
+        db.commit()
+        return {'message':'User deleted successfully'}
+    except:
+        db.rollback()
+        raise HTTPException(status_code=500,
+                            detail='Internal server error')
 # create a student
 @app.post('/create_student/')
 async def create_student(student: Student, db: Session = Depends(get_db)):
-    data = models.StudentsModel(email=student.email, name=student.name, age=student.age, std=student.std)
-    db.add(data)
-    db.commit()
-    db.refresh(data)
-    return data
+    try:
+        data = models.StudentsModel(email=student.email, name=student.name, age=student.age, std=student.std)
+        db.add(data)
+        db.commit()
+        db.refresh(data)
+        return data
+    except:
+        db.rollback()
+        raise HTTPException(status_code=500,
+                            detail='Internal server error')
 
 # get a student
 @app.get('/students/')
 async def students(db: Session = Depends(get_db)):
-    return db.query(models.StudentsModel).all()
+    try:
+        return db.query(models.StudentsModel).all()
+    except:
+        raise HTTPException(status_code=500,
+                                detail='Internal server error')
 
 # update student
 @app.put('/update_student/{studentId}/')
 async def update_student(studentId: int,student:Student, db: Session = Depends(get_db)):
+    try:
 
-    user_data = db.query(models.StudentsModel).filter(models.StudentsModel.id == studentId).first()
-    if not user_data:
-        raise HTTPException(status_code=404, detail='Student not found')
-    user_data.name = student.name
-    user_data.age = student.age
-    user_data.std = student.std
-    db.commit()
-    return {'message':'Student updated successfully'}
+        user_data = db.query(models.StudentsModel).filter(models.StudentsModel.id == studentId).first()
+        if not user_data:
+            raise HTTPException(status_code=404, detail='Student not found')
+        user_data.name = student.name
+        user_data.age = student.age
+        user_data.std = student.std
+        db.commit()
+        return {'message':'Student updated successfully'}
+    except:
+        db.rollback()
+        raise HTTPException(status_code=500,detail='Internal server error')
     
 # delete student
 @app.delete('/delete_student/{studentId}/')
 async def delete_student(studentId: int, db: Session = Depends(get_db)):
-    user_data = db.query(models.StudentsModel).filter(models.StudentsModel.id == studentId).first()
-    if not user_data:
-        raise HTTPException(status_code=404, detail='Student not found')
-    db.delete(user_data)
-    db.commit()
-    return {'message':'Student deleted successfully'}
+    try:
+        user_data = db.query(models.StudentsModel).filter(models.StudentsModel.id == studentId).first()
+        if not user_data:
+            raise HTTPException(status_code=404, detail='Student not found')
+        db.delete(user_data)
+        db.commit()
+        return {'message':'Student deleted successfully'}
+    except:
+        db.rollback()
+        raise HTTPException(status_code=500,detail='Internal server error')
 
 # assign students to teacher
 @app.post('/teachers/{teacherId}/assign_students/{studentId}')
+
 async def assign_students(teacherId: int, studentId: int, db: Session = Depends(get_db)):
-    teacher_data = db.query(models.TeachersModel).filter(models.TeachersModel.id == teacherId).first()
-    student_data = db.query(models.StudentsModel).filter(models.StudentsModel.id == studentId).first()
+    try:
+        teacher_data = db.query(models.TeachersModel).filter(models.TeachersModel.id == teacherId).first()
+        student_data = db.query(models.StudentsModel).filter(models.StudentsModel.id == studentId).first()
 
-    if not (teacher_data):
+        if not (teacher_data):
 
-        raise HTTPException(status_code=404, detail='Teacher not found')
-    if not (student_data):
+            raise HTTPException(status_code=404, detail='Teacher not found')
+        if not (student_data):
 
-        raise HTTPException(status_code=404, detail='Student not found')
-    assign_students_data = models.AssignTeacher(teacher_id=teacher_data.id,student_id=student_data.id)
-    db.add(assign_students_data)
-    db.commit()
-    db.refresh(assign_students_data)
+            raise HTTPException(status_code=404, detail='Student not found')
+        assign_students_data = models.AssignTeacher(teacher_id=teacher_data.id,student_id=student_data.id)
+        db.add(assign_students_data)
+        db.commit()
+        db.refresh(assign_students_data)
 
-    return {'message':'Successfully '}
+        return {'message':'Successfully '}
+    except:
+        db.rollback()
+        raise HTTPException(status_code=500,detail='Internal server error')
 
 
 
@@ -143,15 +193,19 @@ async def assign_students(teacherId: int, studentId: int, db: Session = Depends(
 # create user
 @app.post('/user/')
 async def user_create(user: Users, db: Session = Depends(get_db)):
-    user_data = db.query(models.User).filter(models.User.username == user.username).first()
-    # print(user_data.username)
-    if user_data:
-        raise HTTPException(status_code=400, detail='User already exists')
-    new_user = models.User(username=user.username, password=user.password)
-    db.add(new_user)
-    db.commit()
-    db.refresh(new_user)
-    return new_user
+    try:
+        user_data = db.query(models.User).filter(models.User.username == user.username).first()
+        # print(user_data.username)
+        if user_data:
+            raise HTTPException(status_code=400, detail='User already exists')
+        new_user = models.User(username=user.username, password=user.password)
+        db.add(new_user)
+        db.commit()
+        db.refresh(new_user)
+        return new_user
+    except:
+        db.rollback()
+        raise HTTPException(status_code=500,detail='Internal server error')
 
 # get user
 def get_user(creadentials: HTTPBasicCredentials = Depends(security),db: Session = Depends(get_db)):
